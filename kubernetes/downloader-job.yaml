@@ -11,7 +11,7 @@ spec:
               server: 192.168.1.29
               path: /mnt/DroboFS/Shares/ml_data
         containers:
-          - name: gdrive_download
+          - name: gdrive-download
             image: gclef/gdrive-download:1.0
             imagePullPolicy: "Always"
             volumeMounts:
