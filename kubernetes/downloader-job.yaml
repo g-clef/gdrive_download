@@ -6,7 +6,7 @@ spec:
     template:
       spec:
         volumes:
-          - name: ml_data
+          - name: mldata
             nfs:
               server: 192.168.1.29
               path: /mnt/DroboFS/Shares/ml_data
@@ -15,7 +15,7 @@ spec:
             image: gclef/gdrive-download:1.0
             imagePullPolicy: "Always"
             volumeMounts:
-              - name: malware
+              - name: mldata
                 mountPath: /ml_data
             env:
               - name: OUTPUT_PATH
