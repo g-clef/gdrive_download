@@ -1,0 +1,26 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: gdrive-bro-download-oneoff
+spec:
+    template:
+      spec:
+        volumes:
+          - name: ml_data
+            nfs:
+              server: 192.168.1.29
+              path: /mnt/DroboFS/Shares/ml_data
+        containers:
+          - name: gdrive_download
+            image: gclef/gdrive-download:1.0
+            imagePullPolicy: "Always"
+            volumeMounts:
+              - name: malware
+                mountPath: /ml_data
+            env:
+              - name: OUTPUT_PATH
+                value: /ml_data/OP_TC_data
+        restartPolicy: Never
+        imagePullSecrets:
+          - name: registrycreds
+    backoffLimit: 4
