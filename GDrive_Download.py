@@ -1,10 +1,12 @@
 import io
 import os
 import pickle
+import time
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-from apiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.errors import HttpError
 
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
@@ -44,22 +46,39 @@ class GDriveDownloader:
         return folder
 
     def download_file(self, file_id, name, dest_path):
-        request = self.service.files().get_media(fileId=file_id)
-        fh = io.FileIO(os.path.join(dest_path, name), 'wb')
-        downloader = MediaIoBaseDownload(fh, request, chunksize=1024*1024)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-            print("Download %d%%." % int(status.progress() * 100))
+        success = False
+        count = 0
+        while not success:
+            try:
+                request = self.service.files().get_media(fileId=file_id)
+                fh = io.FileIO(os.path.join(dest_path, name), 'wb')
+                downloader = MediaIoBaseDownload(fh, request, chunksize=1024*1024)
+                done = False
+                while done is False:
+                    status, done = downloader.next_chunk()
+                    print("Download %d%%." % int(status.progress() * 100))
+                success = True
+            except HttpError:
+                # for some reason, google apis sometimes return a 500 error in the middle of
+                # downloading a file. Retry the file when that happens.
+                # but don't keep doing the same thing over and over if it keeps failing.
+                if count > 3:
+                    print(f"downloading {name} failed. ")
+                    raise
+                count += 1
+                print(f"error in downloading {name}. retrying.")
+                time.sleep(10)
+                continue
 
     def walk_folder_tree(self, starting_id, dest_path):
         for entry in self.list_folder_contents(starting_id):
             if str(entry['mimeType']) == str('application/vnd.google-apps.folder'):
                 if not os.path.isdir(os.path.join(dest_path, entry['name'])):
                     os.mkdir(path=os.path.join(dest_path, entry['name']))
-                print(entry['name'])
+                print(f"entering folder {entry['name']}")
                 self.walk_folder_tree(entry['id'], dest_path + "/" + entry['name'])
             else:
+                print(f"downloading file {entry['name']}")
                 self.download_file(entry['id'], entry['name'], dest_path)
 
 

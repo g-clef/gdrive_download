@@ -12,7 +12,7 @@ spec:
               path: /mnt/DroboFS/Shares/ml_data
         containers:
           - name: gdrive-download
-            image: gclef/gdrive-download:1.1
+            image: gclef/gdrive-download:1.2
             imagePullPolicy: "Always"
             volumeMounts:
               - name: mldata
