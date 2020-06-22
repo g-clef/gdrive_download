@@ -45,15 +45,12 @@ class GDriveDownloader:
 
     def download_file(self, file_id, name, dest_path):
         request = self.service.files().get_media(fileId=file_id)
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
+        fh = io.FileIO(os.path.join(dest_path, name), 'wb')
+        downloader = MediaIoBaseDownload(fh, request, chunksize=1024*1024)
         done = False
         while done is False:
             status, done = downloader.next_chunk()
             print("Download %d%%." % int(status.progress() * 100))
-        with io.open(dest_path + "/" + name, 'wb') as f:
-            fh.seek(0)
-            f.write(fh.read())
 
     def walk_folder_tree(self, starting_id, dest_path):
         for entry in self.list_folder_contents(starting_id):
@@ -69,5 +66,5 @@ class GDriveDownloader:
 if __name__ == "__main__":
     starting_drive_id = os.environ.get("DRIVE_ID", "1n3kkS3KR31KUegn42yk3-e6JkZvf0Caa")
     test_path = os.environ.get("OUTPUT_PATH", "/tmp")
-    downloader = GDriveDownloader()
-    downloader.walk_folder_tree(starting_drive_id, test_path)
+    GDownloader = GDriveDownloader()
+    GDownloader.walk_folder_tree(starting_drive_id, test_path)
