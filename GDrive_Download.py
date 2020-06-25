@@ -48,7 +48,7 @@ class GDriveDownloader:
         """
         results = self.service.files().list(
             pageSize=1000, q=f"'{file_id}' in parents",
-            fields="nextPageToken, files(id, name, mimeType)").execute()
+            fields="nextPageToken, files(id, name, mimeType)").execute(num_retries=3)
         folder = results.get('files', [])
         return folder
 
@@ -79,7 +79,7 @@ class GDriveDownloader:
                     downloader = MediaIoBaseDownload(temp_handle, request, chunksize=1024*1024)
                     done = False
                     while done is False:
-                        status, done = downloader.next_chunk()
+                        status, done = downloader.next_chunk(num_retries=3)
                         print("Download %d%%." % int(status.progress() * 100))
                     success = True
                 except HttpError:
