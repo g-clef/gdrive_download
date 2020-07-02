@@ -1,0 +1,33 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: gdrive-bro-download-oneoff
+spec:
+    template:
+      spec:
+        volumes:
+          - name: data
+            nfs:
+              server: <insert your NFS server here>
+              path: <insert your NFS path here>
+          - name: gdrive-token-pickle
+            secret:
+              secretName: gdrive-token-pickle-secret
+              items:
+                - key: token.pickle
+                  path: token.pickle
+        containers:
+          - name: gdrive-download
+            image: gclef/gdrive-download:1.6
+            imagePullPolicy: "Always"
+            volumeMounts:
+              - name: data
+                mountPath: /data
+              - name: gdrive-token-pickle
+                mountPath: "/app"
+                readOnly: true
+            env:
+              - name: OUTPUT_PATH
+                value: /data/OP_TC_data
+        restartPolicy: Never
+    backoffLimit: 4
