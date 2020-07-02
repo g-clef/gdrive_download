@@ -15,16 +15,16 @@ spec:
               secretName: gdrive-token-pickle-secret
               items:
                 - key: token.pickle
-                  path: /app/token.pickle
+                  path: token.pickle
         containers:
           - name: gdrive-download
-            image: gclef/gdrive-download:1.5
+            image: gclef/gdrive-download:1.6
             imagePullPolicy: "Always"
             volumeMounts:
               - name: mldata
                 mountPath: /ml_data
               - name: gdrive-token-pickle
-                mountPath: "/"
+                mountPath: "/app"
                 readOnly: true
             env:
               - name: OUTPUT_PATH

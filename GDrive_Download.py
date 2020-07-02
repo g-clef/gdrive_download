@@ -4,7 +4,6 @@ import shutil
 import tempfile
 import time
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.errors import HttpError
@@ -20,10 +19,8 @@ class GDriveDownloader:
         self.service = build("drive", "v3", credentials=creds)
 
     def authenticate(self):
-        # 1) create a google application here https://developers.google.com/drive/api/v3/quickstart/python
-        # 2) Keep the "credendials.json" file it gives you. Put it next to this script.
-        # 2) run this script on the command line once. It will ask for permission to access your files. say yes.
-        # 3) take the pickle file created, include it with the rest of the build files.
+        # Assumes the existence of a token.pickle. file. This will not create a new one for  you, and will
+        # not save the updated credentials.
         creds = None
         if os.path.exists(self.token_pickle_path):
             with open(self.token_pickle_path, "rb") as filehandle:
@@ -31,12 +28,6 @@ class GDriveDownloader:
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    'credentials.json', SCOPES)
-                creds = flow.run_local_server(port=0)
-            with open(self.token_pickle_path, "wb") as filehandle:
-                pickle.dump(creds, filehandle)
         return creds
 
     def list_folder_contents(self, file_id):
