@@ -80,7 +80,7 @@ class GDriveDownloader:
                     done = False
                     while done is False:
                         status, done = downloader.next_chunk(num_retries=3)
-                        print("Download %d%%." % int(status.progress() * 100))
+                        # print("Download %d%%." % int(status.progress() * 100))
                     success = True
                 except HttpError:
                     # for some reason, google apis sometimes return a 500 error in the middle of

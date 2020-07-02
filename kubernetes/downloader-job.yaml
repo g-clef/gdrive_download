@@ -10,6 +10,11 @@ spec:
             nfs:
               server: 192.168.1.29
               path: /mnt/DroboFS/Shares/ml_data
+          -name: gdrive-token-pickle
+            secret:
+              secretName: gdrive-token-pickle-secret
+              items:
+                - key: token.pickle
         containers:
           - name: gdrive-download
             image: gclef/gdrive-download:1.4
@@ -17,6 +22,9 @@ spec:
             volumeMounts:
               - name: mldata
                 mountPath: /ml_data
+              - name: gdrive-token-pickle
+                mountPath: "/"
+                readOnly: true
             env:
               - name: OUTPUT_PATH
                 value: /ml_data/OP_TC_data
