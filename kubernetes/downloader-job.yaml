@@ -6,10 +6,10 @@ spec:
     template:
       spec:
         volumes:
-          - name: mldata
+          - name: data
             nfs:
-              server: 192.168.1.29
-              path: /mnt/DroboFS/Shares/ml_data
+              server: <insert your NFS server here>
+              path: <insert your NFS path here>
           - name: gdrive-token-pickle
             secret:
               secretName: gdrive-token-pickle-secret
@@ -21,15 +21,13 @@ spec:
             image: gclef/gdrive-download:1.6
             imagePullPolicy: "Always"
             volumeMounts:
-              - name: mldata
-                mountPath: /ml_data
+              - name: data
+                mountPath: /data
               - name: gdrive-token-pickle
                 mountPath: "/app"
                 readOnly: true
             env:
               - name: OUTPUT_PATH
-                value: /ml_data/OP_TC_data
+                value: /data/OP_TC_data
         restartPolicy: Never
-        imagePullSecrets:
-          - name: registrycreds
     backoffLimit: 4
