@@ -14,19 +14,19 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 
 class GDriveDownloader:
     # borrowed heavily from https://stackoverflow.com/questions/39003409/how-to-download-specific-google-drive-folder-using-python  # noqa
-    def __init__(self):
+    def __init__(self, token_pickle_path):
+        self.token_pickle_path = token_pickle_path
         creds = self.authenticate()
         self.service = build("drive", "v3", credentials=creds)
 
-    @staticmethod
-    def authenticate():
+    def authenticate(self):
         # 1) create a google application here https://developers.google.com/drive/api/v3/quickstart/python
         # 2) Keep the "credendials.json" file it gives you. Put it next to this script.
         # 2) run this script on the command line once. It will ask for permission to access your files. say yes.
         # 3) take the pickle file created, include it with the rest of the build files.
         creds = None
-        if os.path.exists("token.pickle"):
-            with open("token.pickle", "rb") as filehandle:
+        if os.path.exists(self.token_pickle_path):
+            with open(self.token_pickle_path, "rb") as filehandle:
                 creds = pickle.load(filehandle)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
@@ -35,7 +35,7 @@ class GDriveDownloader:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     'credentials.json', SCOPES)
                 creds = flow.run_local_server(port=0)
-            with open("token.pickle", "wb") as filehandle:
+            with open(self.token_pickle_path, "wb") as filehandle:
                 pickle.dump(creds, filehandle)
         return creds
 
@@ -121,6 +121,7 @@ class GDriveDownloader:
 
 if __name__ == "__main__":
     starting_drive_id = os.environ.get("DRIVE_ID", "1n3kkS3KR31KUegn42yk3-e6JkZvf0Caa")
+    token_pickle_path = os.environ.get("PICKLE_PATH", "/app/token.pickle")
     test_path = os.environ.get("OUTPUT_PATH", "/tmp/testing")
-    GDownloader = GDriveDownloader()
+    GDownloader = GDriveDownloader(token_pickle_path)
     GDownloader.walk_folder_tree(starting_drive_id, test_path)

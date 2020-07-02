@@ -15,9 +15,10 @@ spec:
               secretName: gdrive-token-pickle-secret
               items:
                 - key: token.pickle
+                  path: /app/token.pickle
         containers:
           - name: gdrive-download
-            image: gclef/gdrive-download:1.4
+            image: gclef/gdrive-download:1.5
             imagePullPolicy: "Always"
             volumeMounts:
               - name: mldata
